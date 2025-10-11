@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic[email]
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+langchain
+langchain-google-genai
+langchain-huggingface
+google-generativeai
+huggingface-hub
+
