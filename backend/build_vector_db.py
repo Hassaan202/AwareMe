@@ -14,7 +14,13 @@ user_agent = "Mozilla/5.0(Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.1
 # URLs to scrape
 web_urls = [
     'https://www.utmb.edu/pedi/home/treating-children-well/2020/04/20/good-touch-and-bad-touch',
-    'https://pmc.ncbi.nlm.nih.gov/articles/PMC10613817/'
+    'https://pmc.ncbi.nlm.nih.gov/articles/PMC10613817/',
+    'https://www.unicef.org/child-protection',
+    'https://www.who.int/news-room/fact-sheets/detail/child-maltreatment',
+    'https://www.ispcan.org/',
+    'https://www.childhelphotline.org/',
+    'https://www.childwelfare.gov/',
+    'https://www.missingkids.org/'
 ]
 
 loader = WebBaseLoader(web_urls)

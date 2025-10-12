@@ -15,6 +15,8 @@ def get_db():
     finally:
         conn.close()
 
+
+
 def init_db():
     with get_db() as db:
         # Users table
@@ -65,6 +67,8 @@ def init_db():
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
         """)
+
+
 
 # USER CRUD
 def create_user(email, password_hash, role, name, age=None):

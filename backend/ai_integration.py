@@ -120,7 +120,7 @@ async def parent_chatbot(message: str):
         print(f"\n✓ RAG context prepared ({len(context)} characters)")
         print("--- End RAG Retrieval ---\n")
 
-    system_prompt = f"""You are an expert advisor helping parents talk to their children 
+    system_prompt = f"""You are an expert advisor helping parents talk to their children
     about personal safety, good touch/bad touch, and recognizing warning signs.
     Provide practical, empathetic advice with actionable steps.
     Reference child psychology and safety best practices.

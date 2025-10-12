@@ -33,6 +33,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
 # AUTH ROUTES
 @app.post("/api/auth/signup", response_model=AuthResponse)
 async def signup(data: SignupRequest):
@@ -84,6 +86,7 @@ async def login(data: LoginRequest):
     return AuthResponse(success=True, token=token, user=user_response, message="Login successful")
 
 
+
 # PROFILE ROUTES
 @app.get("/api/profile", response_model=UserResponse)
 async def get_profile(current_user = Depends(get_current_user)):
@@ -99,6 +102,35 @@ async def get_profile(current_user = Depends(get_current_user)):
         name=user['name'],
         age=user['age']
     )
+
+@app.get("/api/profile/children")
+async def get_children(current_user = Depends(get_current_user)):
+    """Get all linked children profiles for parent"""
+    # Verify current user is a parent
+    parent = get_user_by_id(current_user)
+    if parent['role'] != 'parent':
+        raise HTTPException(status_code=403, detail="Only parents can view children profiles")
+
+    # Get all children linked to this parent
+    children = get_children_of_parent(current_user)
+
+    # Convert to list of UserResponse objects
+    children_profiles = [
+        {
+            "id": child['id'],
+            "email": child['email'],
+            "role": child['role'],
+            "name": child['name'],
+            "age": child['age']
+        }
+        for child in children
+    ]
+
+    return {
+        "success": True,
+        "count": len(children_profiles),
+        "children": children_profiles
+    }
 
 @app.post("/api/profile/link-child", response_model=LinkResponse)
 async def link_child(data: LinkChildRequest, current_user = Depends(get_current_user)):
@@ -120,6 +152,8 @@ async def link_child(data: LinkChildRequest, current_user = Depends(get_current_
     link_parent_child(current_user, child['id'])
 
     return LinkResponse(success=True, message=f"Successfully linked to {child['name']}")
+
+
 
 # CHAT ROUTES
 @app.post("/api/chat/child", response_model=ChatResponse)
@@ -173,6 +207,8 @@ async def chat_parent(data: ChatRequest, current_user = Depends(get_current_user
         distressDetected=False,
         timestamp=datetime.utcnow().isoformat()
     )
+
+
 
 # LEARNING ROUTES
 @app.get("/api/learning/lessons")
@@ -309,6 +345,8 @@ async def submit_quiz(data: QuizSubmission, current_user = Depends(get_current_u
         passed=passed
     )
 
+
+
 # EMERGENCY ROUTES
 @app.post("/api/emergency/alert", response_model=EmergencyResponse)
 async def emergency_alert(data: EmergencyAlert, current_user = Depends(get_current_user)):
@@ -347,6 +385,8 @@ async def get_alerts(current_user = Depends(get_current_user)):
         "success": True,
         "alerts": [dict(alert) for alert in alerts]
     }
+
+
 
 # RESOURCES ROUTES
 @app.get("/api/resources", response_model=ResourcesResponse)
@@ -390,6 +430,48 @@ async def get_resources():
         },
         {
             "id": "r6",
+            "title": "UNICEF - Child Protection",
+            "description": "Violence, Exploitation & Abuse prevention resources",
+            "url": "https://www.unicef.org/child-protection",
+            "category": "Organization"
+        },
+        {
+            "id": "r7",
+            "title": "WHO - Child Maltreatment",
+            "description": "World Health Organization fact sheets on child maltreatment",
+            "url": "https://www.who.int/news-room/fact-sheets/detail/child-maltreatment",
+            "category": "Educational"
+        },
+        {
+            "id": "r8",
+            "title": "ISPCAN",
+            "description": "International Society for the Prevention of Child Abuse and Neglect",
+            "url": "https://www.ispcan.org/",
+            "category": "Organization"
+        },
+        {
+            "id": "r9",
+            "title": "Childhelp National Child Abuse Hotline",
+            "description": "U.S. national hotline for child abuse support and reporting",
+            "url": "https://www.childhelphotline.org/",
+            "category": "Hotline"
+        },
+        {
+            "id": "r10",
+            "title": "Child Welfare Information Gateway",
+            "description": "Comprehensive child welfare resources and information",
+            "url": "https://www.childwelfare.gov/",
+            "category": "Educational"
+        },
+        {
+            "id": "r11",
+            "title": "National Center for Missing & Exploited Children",
+            "description": "NCMEC - Resources for missing and exploited children",
+            "url": "https://www.missingkids.org/",
+            "category": "Organization"
+        },
+        {
+            "id": "r12",
             "title": "Request Counseling Session",
             "description": "Connect with licensed child safety counselors (Mock)",
             "url": "/api/counseling/request",
@@ -407,6 +489,7 @@ async def request_counseling(current_user = Depends(get_current_user)):
         "message": "Counseling request submitted. A counselor will contact you within 24 hours.",
         "requestId": str(uuid.uuid4())
     }
+
 
 # HEALTH CHECK
 @app.get("/")
