@@ -1,13 +1,12 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
-from datetime import datetime
 
 
 
 # AUTH MODELS
 class SignupRequest(BaseModel):
     email: EmailStr = Field(..., description="User email address")
-    password: str = Field(..., min_length=6, description="Password (min 6 characters)")
+    password: str = Field(..., min_length=6, max_length=72, description="Password (min 6 characters)")
     role: str = Field(..., pattern="^(parent|child)$", description="User role: parent or child")
     name: str = Field(..., min_length=1, description="Full name")
     age: Optional[int] = Field(None, ge=1, le=100, description="Age (required for children)")

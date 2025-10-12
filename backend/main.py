@@ -8,6 +8,7 @@ from database import *
 from auth import *
 from ai_integration import *
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Initialize database
@@ -81,6 +82,7 @@ async def login(data: LoginRequest):
     )
 
     return AuthResponse(success=True, token=token, user=user_response, message="Login successful")
+
 
 # PROFILE ROUTES
 @app.get("/api/profile", response_model=UserResponse)
@@ -406,7 +408,7 @@ async def request_counseling(current_user = Depends(get_current_user)):
         "requestId": str(uuid.uuid4())
     }
 
-# Health check
+# HEALTH CHECK
 @app.get("/")
 async def root():
     return {
@@ -414,6 +416,7 @@ async def root():
         "version": "1.0.0",
         "docs": "/docs"
     }
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
