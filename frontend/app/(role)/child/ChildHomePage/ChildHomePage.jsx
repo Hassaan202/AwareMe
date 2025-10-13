@@ -196,8 +196,8 @@ export default function ChildHomePage() {
             <p className="text-xl text-gray-700 mb-8">
               If something doesn't feel right or you're scared, we're here for you!
             </p>
-            <Link href="/child/help">
-              <button className="bg-peach hover:bg-peach text-white px-12 py-6 rounded-3xl font-bold text-2xl shadow-2xl hover:scale-110 transition-all animate-pulse">
+            <Link href="/child/chat">
+              <button className="cursor-pointer bg-peach hover:bg-peach text-white px-12 py-6 rounded-3xl font-bold text-2xl shadow-2xl hover:scale-110 transition-all animate-pulse">
                 Get Help Now
               </button>
             </Link>

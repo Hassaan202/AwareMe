@@ -27,7 +27,7 @@ export default function Register() {
     // backend Logic 
     console.log('Confirm User Data', { ...formData, role })
     if (role == 'parent') {
-      router.push('parent/dashborad')
+      router.push('parent/')
     } else {
       router.push('child/')
     }

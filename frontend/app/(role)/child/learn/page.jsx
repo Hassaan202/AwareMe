@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import ChildNavbar from '../Navbar/Navbar';
 import { useState } from 'react';
 
@@ -260,9 +261,11 @@ export default function ChildLearnPage() {
                 <p className="text-gray-800 mb-4 font-semibold">
                   If someone touched you in a way that felt wrong, tell someone NOW!
                 </p>
-                <button className="w-full bg-peach hover:bg-orange-300 text-white px-6 py-4 rounded-2xl font-bold text-lg shadow-lg transition-all hover:scale-105">
+                <Link href='chat/'>
+                <button className="cursor-pointer w-full bg-peach hover:bg-orange-300 text-white px-6 py-4 rounded-2xl font-bold text-lg shadow-lg transition-all hover:scale-105">
                   Get Help Right Now
                 </button>
+                </Link>
               </div>
             </div>
           </div>

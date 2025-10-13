@@ -69,12 +69,14 @@ export default function Login() {
             />
           </div>
            {/* Submit Button */}
+           <Link href="/parent/">
            <button
             type="submit"
-            className={'w-full py-4 rounded-xl font-bold text-primary-500 shadow-lg transition-all hover:scale-105 bg-teal hover:bg-teal-500'}
-          >
+            className='w-full py-4 rounded-xl font-bold text-primary-500 shadow-lg transition-all hover:scale-105 bg-teal hover:bg-teal-500 cursor-pointer'
+            >
             Login 🚀
           </button>
+            </Link>
         </form>
         {/* Footer Links */}
         <div className="mt-3 text-center">
