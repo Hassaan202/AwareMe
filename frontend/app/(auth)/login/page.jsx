@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 export default function Login() {
+  const [role, setRole] = useState('parent');
   // For Routing 
   const router = useRouter();
   //  For collecting form data
@@ -23,7 +24,20 @@ export default function Login() {
     e.preventDefault()
     // backend Logic 
     console.log('Confirm User Data', { ...formData })
+    if (role == 'parent') {
+      router.push('parent/')
+    } else {
+      router.push('child/')
+    }
   }
+  const getRoute = (role) => {
+    if (role === 'child') {
+      return '/child';
+    } else {
+      return '/parent';
+    }
+  };
+  
   return (
     <div className='min-h-screen bg-peach flex items-center justify-center p-4'>
       <div className="bg-off-white rounded-3xl shadow-2xl border-2 border-primary-200 p-8 w-full max-w-md">
@@ -68,11 +82,56 @@ export default function Login() {
               placeholder="Create a password"
             />
           </div>
+          {/* Role Selection */}
+          <div>
+            <label className=" text-sm font-semibold text-gray-700 mb-3">
+              I am a:
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setRole('parent')}
+                className={`p-2 rounded-xl border-2 transition-all  ${
+                  role === 'parent'
+                    ? 'bg-blue-100 border-blue border-2'
+                    : 'border-2 border-blue'
+                }`}
+              >
+                <div className="text-xl mb-1">👨‍👩‍👧</div>
+                <div className={`font-semibold ${
+                  role === 'parent' ? 'text-blue-400' : 'text-gray-600'
+                }`}>
+                  Parent
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRole('child')}
+                className={`p-2 rounded-xl border-2 transition-all ${
+                  role === 'child'
+                    ? 'bg-green-100 border-teal border-2'
+                    : 'border-2 border-teal'
+                }`}
+              >
+                <div className="text-xl mb-1">👧</div>
+                <div className={`font-semibold ${
+                  role === 'child' ? 'text-green-700' : 'text-gray-600'
+                }`}>
+                  Child
+                </div>
+              </button>
+            </div>
+          </div>
            {/* Submit Button */}
-           <Link href="/parent/">
-           <button
+           <Link href={getRoute(role)}>
+           <button  
             type="submit"
-            className='w-full py-4 rounded-xl font-bold text-primary-500 shadow-lg transition-all hover:scale-105 bg-teal hover:bg-teal-500 cursor-pointer'
+            className={`w-full py-4 rounded-xl font-bold text-primary-500 shadow-lg transition-all hover:scale-105  cursor-pointer ${
+              role == 'parent' ? 'bg-blue hover:bg-blue-400'
+              : 'bg-teal hover:bg-teal-500'
+              }
+            }`}
             >
             Login 🚀
           </button>

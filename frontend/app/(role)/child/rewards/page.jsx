@@ -59,7 +59,7 @@ export default function ChildRewardsPage() {
       <h2 className="text-2xl font-bold text-teal-600 mb-4">Your Badges 🎖️</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {badges.map(badge => (
-          <div key={badge.id} className={`rounded-3xl p-5 border-2 shadow-md transition-all hover:scale-105 ${badge.earned ? 'bg-teal-100 border-teal-400' : 'bg-gray-100 border-gray-300 opacity-70'}`}>
+          <div key={badge.id} className={`rounded-3xl p-5 border-2 shadow-md transition-all hover:scale-105 ${badge.earned ? 'bg-orange-100 border-peach' : 'bg-gray-100 border-gray-300 opacity-70'}`}>
             <h3 className="text-xl font-semibold">{badge.name}</h3>
             <p className="text-gray-600 mt-2">{badge.description}</p>
             {badge.earned ? (

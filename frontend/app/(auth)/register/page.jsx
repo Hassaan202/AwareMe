@@ -134,7 +134,7 @@ export default function Register() {
            {/* Submit Button */}
            <button
             type="submit"
-            className={`w-full py-4 rounded-xl font-bold text-primary-500 shadow-lg transition-all hover:scale-105 ${
+            className={`w-full py-4 rounded-xl font-bold text-primary-500 shadow-lg transition-all hover:scale-105 cursor-pointer ${
               role === 'parent'
                 ? 'bg-blue hover:bg-blue-400'
                 : 'bg-teal hover:bg-teal-500'
