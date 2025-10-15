@@ -2,34 +2,53 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { authAPI, userUtils } from '@/app/utils/api'
 
 export default function Login() {
   const [role, setRole] = useState('parent');
-  // For Routing 
   const router = useRouter();
-  //  For collecting form data
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
-  // store values at it changed 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
-  //  When the form is Submittede
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // backend Logic 
-    console.log('Confirm User Data', { ...formData })
-    if (role == 'parent') {
-      router.push('parent/')
-    } else {
-      router.push('child/')
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await authAPI.login(formData);
+
+      if (response.success) {
+        userUtils.saveToken(response.token);
+        userUtils.saveUser(response.user);
+
+        if (response.user.role === 'parent') {
+          router.push('/parent');
+        } else {
+          router.push('/child');
+        }
+      } else {
+        setError(response.message || 'Login failed. Please check your credentials.');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Unable to connect to server. Please try again.');
+    } finally {
+      setLoading(false);
     }
   }
+
   const getRoute = (role) => {
     if (role === 'child') {
       return '/child';
@@ -48,6 +67,14 @@ export default function Login() {
             LogIn
           </h1>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-xl text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className='space-y-5'>
           
@@ -79,7 +106,7 @@ export default function Login() {
               value={formData.password}
               onChange={handleChange}
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-500 transition-all"
-              placeholder="Create a password"
+              placeholder="Enter your password"
             />
           </div>
           {/* Role Selection */}
@@ -124,18 +151,16 @@ export default function Login() {
             </div>
           </div>
            {/* Submit Button */}
-           <Link href={getRoute(role)}>
-           <button  
+          <button
             type="submit"
-            className={`w-full py-4 rounded-xl font-bold text-primary-500 shadow-lg transition-all hover:scale-105  cursor-pointer ${
+            disabled={loading}
+            className={`w-full py-4 rounded-xl font-bold text-primary-500 shadow-lg transition-all hover:scale-105 cursor-pointer ${
               role == 'parent' ? 'bg-blue hover:bg-blue-400'
               : 'bg-teal hover:bg-teal-500'
-              }
-            }`}
+              } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-            Login 🚀
+            {loading ? 'Logging in...' : 'Login 🚀'}
           </button>
-            </Link>
         </form>
         {/* Footer Links */}
         <div className="mt-3 text-center">

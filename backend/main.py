@@ -34,7 +34,6 @@ app.add_middleware(
 )
 
 
-
 # AUTH ROUTES
 @app.post("/api/auth/signup", response_model=AuthResponse)
 async def signup(data: SignupRequest):

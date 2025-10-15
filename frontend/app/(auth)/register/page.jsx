@@ -2,36 +2,63 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { authAPI, userUtils } from '@/app/utils/api'
 
 export default function Register() {
-  // For Routing 
   const router = useRouter();
-  //  For Role base
   const [role, setRole] = useState('parent');
-  //  For collecting form data
   const [formData, setFormData] = useState({
     email: '',
     name: '',
     password: '',
+    age: '',
   })
-  // store values at it changed 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
-  //  When the form is Submittede
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // backend Logic 
-    console.log('Confirm User Data', { ...formData, role })
-    if (role == 'parent') {
-      router.push('parent/')
-    } else {
-      router.push('child/')
+    setLoading(true);
+    setError('');
+
+    try {
+      const signupData = {
+        email: formData.email,
+        password: formData.password,
+        role: role,
+        name: formData.name,
+        age: role === 'child' && formData.age ? parseInt(formData.age) : null,
+      };
+
+      const response = await authAPI.signup(signupData);
+
+      if (response.success) {
+        userUtils.saveToken(response.token);
+        userUtils.saveUser(response.user);
+
+        if (response.user.role === 'parent') {
+          router.push('/parent');
+        } else {
+          router.push('/child');
+        }
+      } else {
+        setError(response.message || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError('Unable to connect to server. Please try again.');
+    } finally {
+      setLoading(false);
     }
   }
+
   return (
     <div className='min-h-screen bg-peach flex items-center justify-center p-4'>
       <div className="bg-off-white rounded-3xl shadow-2xl border-2 border-primary-200 p-8 w-full max-w-md">
@@ -42,6 +69,14 @@ export default function Register() {
             Create Account
           </h1>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-xl text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className='space-y-5'>
           {/* Name Input */}
@@ -115,6 +150,27 @@ export default function Register() {
               </button>
             </div>
           </div>
+
+          {/* Age Input - Only for Children */}
+          {role === 'child' && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Age
+              </label>
+              <input
+                type="number"
+                name="age"
+                required
+                min="1"
+                max="100"
+                value={formData.age}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-500 transition-all"
+                placeholder="Enter your age"
+              />
+            </div>
+          )}
+
            {/* Password Input */}
            <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -134,14 +190,15 @@ export default function Register() {
            {/* Submit Button */}
            <button
             type="submit"
+            disabled={loading}
             className={`w-full py-4 rounded-xl font-bold text-primary-500 shadow-lg transition-all hover:scale-105 cursor-pointer ${
               role === 'parent'
                 ? 'bg-blue hover:bg-blue-400'
                 : 'bg-teal hover:bg-teal-500'
-            }
+            } ${loading ? 'opacity-50 cursor-not-allowed' : ''}
             `}
           >
-            Create Account 🚀
+            {loading ? 'Creating Account...' : 'Create Account 🚀'}
           </button>
         </form>
         {/* Footer Links */}

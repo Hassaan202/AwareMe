@@ -24,71 +24,54 @@ export default function ChildHomePage() {
 
   return (
     <div className="min-h-screen bg-child">
-      {/* Hero Section with Background Image */}
-      <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1200')",
-            //  filter:  'brightness(0.7)',
-          }}
-        />
-
-        {/* Colorful Overlay */}
-        <div className="absolute inset-0 " />
-        {/* bg-gradient-to-br from-primary-500/70 via-purple-500/60 to-friendly/70 */}
-        {/* Floating Elements Animation */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 animate-bounce text-6xl">⭐</div>
-          <div className="absolute top-40 right-20 animate-pulse text-6xl">🌈</div>
-          <div className="absolute bottom-32 left-1/4 animate-bounce text-5xl" style={{ animationDelay: '0.5s' }}>💙</div>
-          <div className="absolute bottom-20 right-1/3 animate-pulse text-5xl" style={{ animationDelay: '1s' }}>✨</div>
-        </div>
-
+      {/* Hero Section with Solid Peach Background - Reduced Height */}
+      <section className="relative min-h-[450px] flex items-center justify-center overflow-hidden bg-peach">
         {/* Hero Content */}
-        <div className="relative z-10 container mx-auto px-6 py-16 text-center">
+        <div className="relative z-10 container mx-auto px-6 py-12 text-center">
           {/* Mascot/Character */}
-          <div className="mb-6 animate-bounce">
-            <span className="text-5xl drop-shadow-2xl">🛡️</span>
+          <div className="mb-4">
+            <svg className="w-24 h-24 mx-auto" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="45" fill="#80CBC4" opacity="0.3"/>
+              <path d="M50 20 L35 35 L35 65 L50 80 L65 65 L65 35 Z" fill="#80CBC4" stroke="#2C7A7B" strokeWidth="2"/>
+              <circle cx="42" cy="45" r="3" fill="#2C7A7B"/>
+              <circle cx="58" cy="45" r="3" fill="#2C7A7B"/>
+              <path d="M40 55 Q50 60 60 55" stroke="#2C7A7B" strokeWidth="2" fill="none"/>
+            </svg>
           </div>
 
           {/* Main Heading */}
-          <h1 className="text-5xl md:text-5xl font-black text-white mb-6 drop-shadow-2xl leading-tight">
+          <h1 className="text-4xl md:text-5xl font-black text-blue mb-4 leading-tight">
             You Are Brave!
             <br />
-            <span className="text-friendly">You Are Safe!</span>
+            <span className="text-teal">You Are Safe!</span>
           </h1>
 
           {/* Subheading */}
-          <p className="text-2xl md:text-3xl text-white font-bold mb-4 drop-shadow-lg">
-            We're Here for You! 💙✨
+          <p className="text-xl md:text-2xl text-gray-800 font-bold mb-3">
+            We're Here for You!
           </p>
 
-          <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto drop-shadow-lg">
+          <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
             Learn about safety, play fun games, and chat with your friendly guide anytime!
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap gap-4 justify-center mb-12">
+          {/* CTA Buttons - Removed Games */}
+          <div className="flex flex-wrap gap-4 justify-center mb-8">
             <Link href="/child/chat">
-              <button className="bg-peach text-primary-600 px-8 py-5 rounded-3xl font-bold text-xl shadow-2xl hover:scale-110 transition-all flex items-center space-x-3">
-                <span className="text-3xl">💬</span>
+              <button className="bg-white text-primary-600 px-8 py-4 rounded-3xl font-bold text-lg shadow-2xl hover:scale-110 transition-all flex items-center space-x-3">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
                 <span>Chat with Friend</span>
               </button>
             </Link>
 
             <Link href="/child/learn">
-              <button className="bg-blue text-gray-800 px-8 py-5 rounded-3xl font-bold text-xl shadow-2xl hover:scale-110 transition-all flex items-center space-x-3">
-                <span className="text-3xl">📚</span>
+              <button className="bg-blue text-white px-8 py-4 rounded-3xl font-bold text-lg shadow-2xl hover:scale-110 transition-all flex items-center space-x-3">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
                 <span>Start Learning</span>
-              </button>
-            </Link>
-
-            <Link href="/child/games">
-              <button className="bg-teal text-white px-8 py-5 rounded-3xl font-bold text-xl shadow-2xl hover:scale-110 transition-all flex items-center space-x-3">
-                <span className="text-3xl">🎮</span>
-                <span>Play Games</span>
               </button>
             </Link>
           </div>
@@ -99,7 +82,7 @@ export default function ChildHomePage() {
       <section className="py-16 bg-gradient-to-b from-child to-white">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl text-blue md:text-5xl font-black text-center text-primary-600 mb-12">
-            🌟 Did You Know?
+            Did You Know?
           </h2>
 
           <div className="grid md:grid-cols-4 gap-6 max-w-6xl mx-auto">
@@ -130,14 +113,18 @@ export default function ChildHomePage() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-black text-center text-blue mb-12">
-            What Can You Do Here? 🚀
+            What Can You Do Here?
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Feature 1 */}
-            <div className="bg-orange-50 rounded-3xl p-8 border-4 border-orange-100 hover:border-orange-400  hover:shadow-xl transition-all">
-              <div className="text-7xl mb-4 text-center">💬</div>
-              <h3 className="text-orange-300 text-2xl font-bold text-primary-700 mb-3 text-center">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Feature 1 - Chat */}
+            <div className="bg-orange-50 rounded-3xl p-8 border-4 border-orange-100 hover:border-orange-400 hover:shadow-xl transition-all">
+              <div className="flex justify-center mb-4">
+                <svg className="w-20 h-20 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-orange-600 mb-3 text-center">
                 Chat Anytime
               </h3>
               <p className="text-gray-700 text-center text-lg">
@@ -150,9 +137,13 @@ export default function ChildHomePage() {
               </Link>
             </div>
 
-            {/* Feature 2 */}
+            {/* Feature 2 - Learn */}
             <div className="bg-teal-50 rounded-3xl p-8 border-4 border-teal-200 hover:border-teal-400 hover:shadow-xl transition-all">
-              <div className="text-7xl mb-4 text-center">📚</div>
+              <div className="flex justify-center mb-4">
+                <svg className="w-20 h-20 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
               <h3 className="text-2xl font-bold text-teal-700 mb-3 text-center">
                 Learn & Grow
               </h3>
@@ -166,41 +157,30 @@ export default function ChildHomePage() {
               </Link>
             </div>
 
-            {/* Feature 3 */}
-            <div className="bg-blue-50 rounded-3xl p-8 border-4 border-blue-200 hover:border-blue-400 hover:shadow-xl transition-all">
-              <div className="text-7xl mb-4 text-center">🎮</div>
-              <h3 className="text-2xl font-bold text-blue-700 mb-3 text-center">
-                Play & Win
+            {/* Feature 3 - Emergency */}
+            <div className="bg-red-50 rounded-3xl p-8 border-4 border-red-200 hover:border-red-400 hover:shadow-xl transition-all">
+              <div className="flex justify-center mb-4">
+                <svg className="w-20 h-20 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-red-600 mb-3 text-center">
+                Get Help Now
               </h3>
               <p className="text-gray-700 text-center text-lg">
-                Play games and earn stars, badges, and rewards!
+                Need help right now? Click the red button to send an emergency alert!
               </p>
-              <Link href="/child/games">
-                <button className="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold transition-all cursor-pointer">
-                  Play Now
-                </button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Emergency Section */}
-      <section className="py-16 bg-gradient-to-br from-emergency-light to-emergency/30">
-        <div className="container mx-auto px-6 text-center">
-          <div className="max-w-3xl mx-auto bg-white rounded-3xl p-12 shadow-2xl border-2 border-peach">
-            <div className="text-8xl mb-6">🆘</div>
-            <h2 className="text-4xl font-black text-gray-800 mb-4">
-              Need Help Right Now?
-            </h2>
-            <p className="text-xl text-gray-700 mb-8">
-              If something doesn't feel right or you're scared, we're here for you!
-            </p>
-            <Link href="/child/chat">
-              <button className="cursor-pointer bg-peach hover:bg-peach text-white px-12 py-6 rounded-3xl font-bold text-2xl shadow-2xl hover:scale-110 transition-all animate-pulse">
-                Get Help Now
+              <button
+                onClick={() => {
+                  // Trigger the emergency button click
+                  const emergencyBtn = document.querySelector('[title="Emergency Alert"]');
+                  if (emergencyBtn) emergencyBtn.click();
+                }}
+                className="mt-6 w-full bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-2xl font-bold transition-all cursor-pointer"
+              >
+                Emergency Alert
               </button>
-            </Link>
+            </div>
           </div>
         </div>
       </section>

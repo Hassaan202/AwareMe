@@ -1,42 +1,49 @@
 "use client"
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import ParentNavbar from "../navbar/Navbar";
+import { resourcesAPI } from "@/app/utils/api";
+
 export default function ParentResources() {
     const [search, setSearch] = useState("");
+    const [resources, setResources] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const resources = [
-        {
-            title: "Understanding Child Safety Online",
-            desc: "Learn how to protect your child from online risks, cyberbullying, and unsafe platforms.",
-            link: "https://www.unicef.org/parenting/child-safety-online",
-            tag: "Online Safety",
-        },
-        {
-            title: "Good Touch & Bad Touch",
-            desc: "A guide to teaching children about body safety and consent in a comfortable way.",
-            link: "https://www.childlineindia.org/a/child-abuse",
-            tag: "Body Safety",
-        },
-        {
-            title: "Parent-Child Communication Tips",
-            desc: "How to talk with your child about sensitive topics and build trust.",
-            link: "https://www.verywellfamily.com/communication-tips-parents-and-children-4158237",
-            tag: "Parenting Tips",
-        },
-        {
-            title: "Dealing with Emotional Distress",
-            desc: "Recognizing signs of anxiety or fear in children and how to offer comfort.",
-            link: "https://www.apa.org/topics/children-stress",
-            tag: "Mental Health",
-        },
-    ];
+    useEffect(() => {
+        // Fetch resources from backend
+        const fetchResources = async () => {
+            try {
+                const response = await resourcesAPI.getResources();
+                if (response.success) {
+                    setResources(response.resources);
+                }
+            } catch (error) {
+                console.error('Error fetching resources:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchResources();
+    }, []);
 
     const filtered = resources.filter(
         (r) =>
             r.title.toLowerCase().includes(search.toLowerCase()) ||
-            r.tag.toLowerCase().includes(search.toLowerCase())
+            r.category.toLowerCase().includes(search.toLowerCase())
     );
+
+    const handleCounselingRequest = async () => {
+        try {
+            const response = await resourcesAPI.requestCounseling();
+            if (response.success) {
+                alert(response.message);
+            }
+        } catch (error) {
+            console.error('Error requesting counseling:', error);
+            alert('Unable to submit request. Please try again.');
+        }
+    };
 
     return (<>
     <ParentNavbar />
@@ -57,30 +64,45 @@ export default function ParentResources() {
             </div>
 
             {/* Resources Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filtered.map((res, i) => (
-                    <div
-                        key={i}
-                        className="bg-peach border-2 border-teal rounded-2xl p-5 shadow hover:shadow-[#33dfbc]/30 transition"
-                    >
-                        <h2 className="text-xl font-semibold mb-2">{res.title}</h2>
-                        <p className="text-sm mb-3">{res.desc}</p>
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs bg-teal px-3 py-1 rounded-full">
-                                {res.tag}
-                            </span>
-                            <a
-                                href={res.link}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-teal-400 hover:underline text-sm"
-                            >
-                                Read More →
-                            </a>
+            {loading ? (
+                <div className="text-center py-10">
+                    <p className="text-xl">Loading resources...</p>
+                </div>
+            ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filtered.map((res) => (
+                        <div
+                            key={res.id}
+                            className="bg-peach border-2 border-teal rounded-2xl p-5 shadow hover:shadow-[#33dfbc]/30 transition"
+                        >
+                            <h2 className="text-xl font-semibold mb-2">{res.title}</h2>
+                            <p className="text-sm mb-3">{res.description}</p>
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs bg-teal px-3 py-1 rounded-full">
+                                    {res.category}
+                                </span>
+                                {res.category === 'Counseling' ? (
+                                    <button
+                                        onClick={handleCounselingRequest}
+                                        className="text-teal-400 hover:underline text-sm"
+                                    >
+                                        Request →
+                                    </button>
+                                ) : (
+                                    <a
+                                        href={res.url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-teal-400 hover:underline text-sm"
+                                    >
+                                        {res.category === 'Hotline' ? 'Call' : 'Read More'} →
+                                    </a>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
 
             {/* Emergency Helplines */}
             <div className="mt-10 bg-peach border-2 border-teal rounded-2xl p-6 text-center">
