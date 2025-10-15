@@ -2,30 +2,11 @@
 import Link from 'next/link';
 import ChildNavbar from '../Navbar/Navbar';
 import EmergencyButton from '@/app/components/EmergencyButton';
-import MarkdownRenderer from '@/app/components/MarkdownRenderer';
 import { useState, useEffect } from 'react';
-import { learningAPI } from '@/app/utils/api';
-import {
-  Gamepad2,
-  BookOpen,
-  Sparkles,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Shield,
-  Lightbulb,
-  Heart,
-  Users,
-  Phone,
-  ArrowLeft,
-  Trophy,
-  PartyPopper,
-  Smile,
-  Frown
-} from 'lucide-react';
+import { userUtils } from '@/app/utils/api';
 
 export default function ChildLearnPage() {
-  const [selectedMode, setSelectedMode] = useState(null);
+  const [selectedMode, setSelectedMode] = useState(null); // 'game' or 'lessons'
   const [lessons, setLessons] = useState([]);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -34,7 +15,7 @@ export default function ChildLearnPage() {
   const [quizResult, setQuizResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Body zones data for game mode
+  // Body zones data for the game mode
   const [selectedZone, setSelectedZone] = useState(null);
   const [learnedZones, setLearnedZones] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
@@ -43,68 +24,69 @@ export default function ChildLearnPage() {
     head: {
       type: 'good',
       title: 'Head',
-      icon: CheckCircle,
+      icon: '✅',
       color: 'bg-teal-400',
       message: "It's okay when trusted adults pat your head!",
       tip: "But remember: You can always say NO if you don't want it!",
-      emoji: Heart,
+      emoji: '💚',
     },
     shoulders: {
       type: 'good',
       title: 'Shoulders',
-      icon: CheckCircle,
+      icon: '✅',
       color: 'bg-teal-400',
       message: "Friendly pats on the shoulder are usually okay!",
       tip: "From people you know and trust, like family and teachers.",
-      emoji: Heart,
+      emoji: '💚',
     },
     arms: {
       type: 'good',
       title: 'Arms & Hands',
-      icon: CheckCircle,
+      icon: '✅',
       color: 'bg-teal-400',
       message: "Handshakes and helping hands are good touches!",
       tip: "These are friendly and helpful touches.",
-      emoji: Heart,
+      emoji: '💚',
     },
     chest: {
       type: 'bad',
       title: 'Chest (Private)',
-      icon: XCircle,
+      icon: '❌',
       color: 'bg-red-400',
       message: "This is a PRIVATE zone! Nobody should touch here!",
       tip: "If anyone tries, say NO loudly and tell a trusted adult RIGHT AWAY!",
-      emoji: Shield,
+      emoji: '🛡️',
     },
     privateBottom: {
       type: 'bad',
       title: 'Private Parts',
-      icon: XCircle,
+      icon: '❌',
       color: 'bg-red-400',
       message: "This is YOUR private area covered by your swimsuit!",
       tip: "You are the BOSS of your body! Nobody should touch these areas!",
-      emoji: Shield,
+      emoji: '🛡️',
     },
     back: {
       type: 'warning',
       title: 'Back',
-      icon: AlertTriangle,
+      icon: '⚠️',
       color: 'bg-yellow-400',
       message: "Upper back pats are usually okay from trusted people.",
       tip: "But lower back touches can be inappropriate. Trust your feelings!",
-      emoji: Heart,
+      emoji: '💛',
     },
     legs: {
       type: 'warning',
       title: 'Legs',
-      icon: AlertTriangle,
+      icon: '⚠️',
       color: 'bg-yellow-400',
       message: "Knees and feet are okay, but inner thighs are private!",
       tip: "If any touch feels wrong or makes you uncomfortable, say NO!",
-      emoji: Heart,
+      emoji: '💛',
     },
   };
 
+  // Fetch lessons from API
   useEffect(() => {
     if (selectedMode === 'lessons') {
       fetchLessons();
@@ -114,7 +96,13 @@ export default function ChildLearnPage() {
   const fetchLessons = async () => {
     try {
       setLoading(true);
-      const data = await learningAPI.getLessons();
+      const token = userUtils.getToken();
+      const response = await fetch('http://localhost:8000/api/learning/lessons', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
       if (data.success) {
         setLessons(data.lessons);
       }
@@ -149,7 +137,19 @@ export default function ChildLearnPage() {
   const submitQuiz = async () => {
     try {
       setLoading(true);
-      const data = await learningAPI.submitQuiz(selectedLesson.id, answers);
+      const token = userUtils.getToken();
+      const response = await fetch('http://localhost:8000/api/learning/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          lessonId: selectedLesson.id,
+          answers: answers
+        })
+      });
+      const data = await response.json();
       if (data.success) {
         setQuizResult(data);
         setShowResults(true);
@@ -186,7 +186,9 @@ export default function ChildLearnPage() {
             <h1 className="text-5xl font-black text-blue">Learn About Safety!</h1>
             <Link href="/child">
               <button className="bg-teal text-white px-6 py-3 rounded-2xl font-bold hover:bg-teal-600 transition flex items-center space-x-2 cursor-pointer">
-                <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
                 <span>Go Back</span>
               </button>
             </Link>
@@ -199,8 +201,8 @@ export default function ChildLearnPage() {
               className="bg-white rounded-3xl p-8 shadow-2xl border-4 border-teal hover:border-blue hover:scale-105 transition-all cursor-pointer group"
             >
               <div className="text-center">
-                <div className="bg-teal w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all">
-                  <Gamepad2 className="w-16 h-16 text-white" strokeWidth={2.5} />
+                <div className="bg-teal w-32 h-32 rounded-full flex items-center justify-center text-6xl mx-auto mb-6 group-hover:scale-110 transition-all">
+                  🎮
                 </div>
                 <h2 className="text-3xl font-black text-gray-800 mb-4">
                   Interactive Body Game
@@ -209,9 +211,8 @@ export default function ChildLearnPage() {
                   Click on different body parts to learn about good touch and bad touch!
                 </p>
                 <div className="bg-teal-100 rounded-2xl p-4 mt-4">
-                  <p className="text-teal-700 font-bold flex items-center justify-center gap-2">
-                    <Sparkles className="w-5 h-5" strokeWidth={2.5} />
-                    Fun & Interactive Learning
+                  <p className="text-teal-700 font-bold">
+                    ✨ Fun & Interactive Learning
                   </p>
                 </div>
               </div>
@@ -223,8 +224,8 @@ export default function ChildLearnPage() {
               className="bg-white rounded-3xl p-8 shadow-2xl border-4 border-blue hover:border-teal hover:scale-105 transition-all cursor-pointer group"
             >
               <div className="text-center">
-                <div className="bg-blue w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all">
-                  <BookOpen className="w-16 h-16 text-white" strokeWidth={2.5} />
+                <div className="bg-blue w-32 h-32 rounded-full flex items-center justify-center text-6xl mx-auto mb-6 group-hover:scale-110 transition-all">
+                  📚
                 </div>
                 <h2 className="text-3xl font-black text-gray-800 mb-4">
                   Safety Lessons
@@ -233,9 +234,8 @@ export default function ChildLearnPage() {
                   Complete interactive lessons and quizzes to learn about staying safe!
                 </p>
                 <div className="bg-blue-100 rounded-2xl p-4 mt-4">
-                  <p className="text-blue font-bold flex items-center justify-center gap-2">
-                    <BookOpen className="w-5 h-5" strokeWidth={2.5} />
-                    Learn & Test Your Knowledge
+                  <p className="text-blue font-bold">
+                    📖 Learn & Test Your Knowledge
                   </p>
                 </div>
               </div>
@@ -259,7 +259,9 @@ export default function ChildLearnPage() {
               onClick={() => setSelectedMode(null)}
               className="bg-teal text-white px-6 py-3 rounded-2xl font-bold hover:bg-teal-600 transition flex items-center space-x-2 cursor-pointer"
             >
-              <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
               <span>Back to Menu</span>
             </button>
           </div>
@@ -300,13 +302,41 @@ export default function ChildLearnPage() {
                 />
 
                 {/* Transparent clickable zones */}
-                <div className="absolute cursor-pointer hover:bg-blue-200/40 rounded-full" style={{ top: '6%', left: '43%', width: '14%', height: '10%' }} onClick={() => handleZoneClick('head')}></div>
-                <div className="absolute cursor-pointer hover:bg-blue-200/40 rounded-xl" style={{ top: '17%', left: '38%', width: '24%', height: '10%' }} onClick={() => handleZoneClick('shoulders')}></div>
-                <div className="absolute cursor-pointer hover:bg-blue-200/40 rounded-xl" style={{ top: '25%', left: '28%', width: '44%', height: '15%' }} onClick={() => handleZoneClick('arms')}></div>
-                <div className="absolute cursor-pointer hover:bg-red-300/40 rounded-xl" style={{ top: '38%', left: '40%', width: '20%', height: '10%' }} onClick={() => handleZoneClick('chest')}></div>
-                <div className="absolute cursor-pointer hover:bg-yellow-300/40 rounded-xl" style={{ top: '48%', left: '40%', width: '20%', height: '8%' }} onClick={() => handleZoneClick('back')}></div>
-                <div className="absolute cursor-pointer hover:bg-red-300/40 rounded-full" style={{ top: '55%', left: '42%', width: '16%', height: '10%' }} onClick={() => handleZoneClick('privateBottom')}></div>
-                <div className="absolute cursor-pointer hover:bg-yellow-200/40 rounded-xl" style={{ top: '65%', left: '44%', width: '12%', height: '25%' }} onClick={() => handleZoneClick('legs')}></div>
+                <div
+                  className="absolute cursor-pointer hover:bg-blue-200/40 rounded-full"
+                  style={{ top: '6%', left: '43%', width: '14%', height: '10%' }}
+                  onClick={() => handleZoneClick('head')}
+                ></div>
+                <div
+                  className="absolute cursor-pointer hover:bg-blue-200/40 rounded-xl"
+                  style={{ top: '17%', left: '38%', width: '24%', height: '10%' }}
+                  onClick={() => handleZoneClick('shoulders')}
+                ></div>
+                <div
+                  className="absolute cursor-pointer hover:bg-blue-200/40 rounded-xl"
+                  style={{ top: '25%', left: '28%', width: '44%', height: '15%' }}
+                  onClick={() => handleZoneClick('arms')}
+                ></div>
+                <div
+                  className="absolute cursor-pointer hover:bg-red-300/40 rounded-xl"
+                  style={{ top: '38%', left: '40%', width: '20%', height: '10%' }}
+                  onClick={() => handleZoneClick('chest')}
+                ></div>
+                <div
+                  className="absolute cursor-pointer hover:bg-yellow-300/40 rounded-xl"
+                  style={{ top: '48%', left: '40%', width: '20%', height: '8%' }}
+                  onClick={() => handleZoneClick('back')}
+                ></div>
+                <div
+                  className="absolute cursor-pointer hover:bg-red-300/40 rounded-full"
+                  style={{ top: '55%', left: '42%', width: '16%', height: '10%' }}
+                  onClick={() => handleZoneClick('privateBottom')}
+                ></div>
+                <div
+                  className="absolute cursor-pointer hover:bg-yellow-200/40 rounded-xl"
+                  style={{ top: '65%', left: '44%', width: '12%', height: '25%' }}
+                  onClick={() => handleZoneClick('legs')}
+                ></div>
               </div>
             </div>
 
@@ -316,8 +346,8 @@ export default function ChildLearnPage() {
                 <h3 className="text-2xl font-bold text-teal mb-4">Color Guide:</h3>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-teal rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-6 h-6 text-white" strokeWidth={2.5} />
+                    <div className="w-12 h-12 bg-teal rounded-full flex items-center justify-center text-2xl">
+                      ✅
                     </div>
                     <div>
                       <p className="font-bold text-gray-800">Green = Good Touch</p>
@@ -325,8 +355,8 @@ export default function ChildLearnPage() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-red-400 rounded-full flex items-center justify-center">
-                      <XCircle className="w-6 h-6 text-white" strokeWidth={2.5} />
+                    <div className="w-12 h-12 bg-red-400 rounded-full flex items-center justify-center text-2xl">
+                      ❌
                     </div>
                     <div>
                       <p className="font-bold text-gray-800">Red = Private Zone</p>
@@ -334,8 +364,8 @@ export default function ChildLearnPage() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
-                      <AlertTriangle className="w-6 h-6 text-white" strokeWidth={2.5} />
+                    <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center text-2xl">
+                      ⚠️
                     </div>
                     <div>
                       <p className="font-bold text-gray-800">Yellow = Depends</p>
@@ -346,93 +376,65 @@ export default function ChildLearnPage() {
               </div>
 
               <div className="bg-blue-100 rounded-3xl p-6 shadow-xl border-2 border-blue">
-                <h3 className="text-2xl font-bold text-blue mb-4 flex items-center gap-2">
-                  <Shield className="w-7 h-7" strokeWidth={2.5} />
-                  Remember:
-                </h3>
+                <h3 className="text-2xl font-bold text-blue mb-4">💪 Remember:</h3>
                 <ul className="space-y-3 text-gray-800">
                   <li className="flex items-start space-x-2">
-                    <Shield className="w-5 h-5 text-teal mt-0.5 flex-shrink-0" strokeWidth={2.5} />
+                    <span className="text-xl">🛡️</span>
                     <span className="font-semibold">Your body belongs to YOU!</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <Sparkles className="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" strokeWidth={2.5} />
+                    <span className="text-xl">🗣️</span>
                     <span className="font-semibold">You can say NO to anyone!</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <Users className="w-5 h-5 text-blue mt-0.5 flex-shrink-0" strokeWidth={2.5} />
-                    <span className="font-semibold">Tell a trusted adult if something feels wrong!</span>
+                    <span className="text-xl">👨‍👩‍👧</span>
+                    <span className="font-semibold">
+                      Tell a trusted adult if something feels wrong!
+                    </span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <Heart className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" strokeWidth={2.5} />
+                    <span className="text-xl">💙</span>
                     <span className="font-semibold">It's NEVER your fault!</span>
                   </li>
                 </ul>
-              </div>
-
-              <div className="bg-red-100 rounded-3xl p-6 shadow-xl border-2 border-red-400">
-                <h3 className="text-2xl font-bold text-red-600 mb-3 flex items-center gap-2">
-                  <Phone className="w-7 h-7" strokeWidth={2.5} />
-                  Need Help?
-                </h3>
-                <p className="text-gray-800 mb-4 font-semibold">
-                  If someone touched you in a way that felt wrong, tell someone NOW!
-                </p>
-                <Link href="/child/chat">
-                  <button className="cursor-pointer w-full bg-red-500 hover:bg-red-600 text-white px-6 py-4 rounded-2xl font-bold text-lg shadow-lg transition-all hover:scale-105">
-                    Get Help Right Now
-                  </button>
-                </Link>
               </div>
             </div>
           </div>
 
           {/* Popup */}
           {showPopup && selectedZone && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={closePopup}>
-              <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border-2 border-blue-300" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+              onClick={closePopup}
+            >
+              <div
+                className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border-2 border-blue-300"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="text-center">
-                  <div className={`${bodyZones[selectedZone].color} w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl`}>
-                    {React.createElement(bodyZones[selectedZone].emoji, { className: "w-12 h-12 text-white", strokeWidth: 2 })}
+                  <div
+                    className={`${bodyZones[selectedZone].color} w-24 h-24 rounded-full flex items-center justify-center text-5xl mx-auto mb-4 shadow-xl`}
+                  >
+                    {bodyZones[selectedZone].emoji}
                   </div>
-                  <h3 className="text-3xl font-black text-gray-800 mb-3 flex items-center justify-center gap-2">
-                    {React.createElement(bodyZones[selectedZone].icon, { className: "w-8 h-8", strokeWidth: 2.5 })}
-                    {bodyZones[selectedZone].title}
+                  <h3 className="text-3xl font-black text-gray-800 mb-3">
+                    {bodyZones[selectedZone].icon} {bodyZones[selectedZone].title}
                   </h3>
                   <p className="text-xl text-gray-800 font-semibold mb-3">
                     {bodyZones[selectedZone].message}
                   </p>
                   <div className="bg-blue-50 rounded-2xl p-4 mb-6">
-                    <p className="text-lg text-blue font-semibold flex items-center justify-center gap-2">
-                      <Lightbulb className="w-5 h-5" strokeWidth={2.5} />
-                      {bodyZones[selectedZone].tip}
+                    <p className="text-lg text-blue font-semibold">
+                      💡 {bodyZones[selectedZone].tip}
                     </p>
                   </div>
-                  <button onClick={closePopup} className="bg-teal hover:bg-teal-600 text-white px-8 py-3 rounded-2xl font-bold transition cursor-pointer flex items-center justify-center gap-2 mx-auto">
-                    <span>Got it!</span>
-                    <CheckCircle className="w-5 h-5" strokeWidth={2.5} />
+                  <button
+                    onClick={closePopup}
+                    className="bg-teal hover:bg-teal-600 text-white px-8 py-3 rounded-2xl font-bold transition cursor-pointer"
+                  >
+                    Got it! ✅
                   </button>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Completion Message */}
-          {progress === 100 && (
-            <div className="mt-8 bg-teal rounded-3xl p-8 text-center shadow-2xl border-2 border-teal">
-              <div className="flex justify-center mb-4">
-                <Shield className="w-20 h-20 text-white" strokeWidth={2} />
-              </div>
-              <h2 className="text-4xl font-black text-white mb-3">
-                Amazing Job! You're a Safety Expert!
-              </h2>
-              <p className="text-xl text-white font-semibold mb-4">
-                You've learned all about safe touches!
-              </p>
-              <div className="flex justify-center space-x-2">
-                {[...Array(5)].map((_, i) => (
-                  <Sparkles key={i} className="w-8 h-8 text-yellow-300 fill-yellow-300" strokeWidth={2} />
-                ))}
               </div>
             </div>
           )}
@@ -452,8 +454,13 @@ export default function ChildLearnPage() {
           <div className="min-h-screen bg-gradient-to-b from-peach to-white p-6">
             <div className="flex justify-between items-center mb-8">
               <h1 className="text-4xl font-black text-blue">Safety Lessons</h1>
-              <button onClick={() => setSelectedMode(null)} className="bg-teal text-white px-6 py-3 rounded-2xl font-bold hover:bg-teal-600 transition flex items-center space-x-2 cursor-pointer">
-                <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
+              <button
+                onClick={() => setSelectedMode(null)}
+                className="bg-teal text-white px-6 py-3 rounded-2xl font-bold hover:bg-teal-600 transition flex items-center space-x-2 cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
                 <span>Back to Menu</span>
               </button>
             </div>
@@ -465,26 +472,30 @@ export default function ChildLearnPage() {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                {lessons.map((lesson, index) => {
-                  const lessonIcons = [Heart, Shield, Users];
-                  const LessonIcon = lessonIcons[index % lessonIcons.length];
-
-                  return (
-                    <div key={lesson.id} onClick={() => handleLessonSelect(lesson)} className="bg-white rounded-3xl p-6 shadow-xl border-2 border-blue hover:border-teal hover:scale-105 transition-all cursor-pointer">
-                      <div className="text-center">
-                        <div className="bg-blue w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <LessonIcon className="w-10 h-10 text-white" strokeWidth={2.5} />
-                        </div>
-                        <h3 className="text-2xl font-black text-gray-800 mb-3">{lesson.title}</h3>
-                        <p className="text-gray-700 font-semibold mb-4">{lesson.description}</p>
-                        <div className="bg-blue-100 rounded-xl p-3 flex items-center justify-center gap-2">
-                          <BookOpen className="w-5 h-5 text-blue" strokeWidth={2.5} />
-                          <p className="text-blue font-bold text-sm">{lesson.questions.length} Questions</p>
-                        </div>
+                {lessons.map((lesson, index) => (
+                  <div
+                    key={lesson.id}
+                    onClick={() => handleLessonSelect(lesson)}
+                    className="bg-white rounded-3xl p-6 shadow-xl border-2 border-blue hover:border-teal hover:scale-105 transition-all cursor-pointer"
+                  >
+                    <div className="text-center">
+                      <div className="bg-blue w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">
+                        {index === 0 ? '🤗' : index === 1 ? '💪' : '👨‍👩‍👧'}
+                      </div>
+                      <h3 className="text-2xl font-black text-gray-800 mb-3">
+                        {lesson.title}
+                      </h3>
+                      <p className="text-gray-700 font-semibold mb-4">
+                        {lesson.description}
+                      </p>
+                      <div className="bg-blue-100 rounded-xl p-3">
+                        <p className="text-blue font-bold text-sm">
+                          {lesson.questions.length} Questions
+                        </p>
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -504,86 +515,58 @@ export default function ChildLearnPage() {
             <div className="max-w-4xl mx-auto">
               <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-black text-blue">{selectedLesson.title}</h1>
-                <button onClick={() => setSelectedLesson(null)} className="bg-teal text-white px-6 py-3 rounded-2xl font-bold hover:bg-teal-600 transition cursor-pointer flex items-center gap-2">
-                  <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Back to Lessons</span>
+                <button
+                  onClick={() => setSelectedLesson(null)}
+                  className="bg-teal text-white px-6 py-3 rounded-2xl font-bold hover:bg-teal-600 transition cursor-pointer"
+                >
+                  Back to Lessons
                 </button>
               </div>
 
               {/* Progress */}
-              <div className="bg-white rounded-2xl p-4 mb-6 shadow-lg border-2 border-blue">
+              <div className="bg-white rounded-2xl p-4 mb-6 shadow-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-bold text-gray-700 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-blue" strokeWidth={2.5} />
+                  <span className="font-bold text-gray-700">
                     Question {currentQuestionIndex + 1} of {selectedLesson.questions.length}
-                  </span>
-                  <span className="text-sm font-semibold text-gray-600 bg-blue-100 px-3 py-1 rounded-full">
-                    {Math.round(((currentQuestionIndex + 1) / selectedLesson.questions.length) * 100)}%
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div className="bg-blue h-3 rounded-full transition-all flex items-center justify-end pr-1" style={{ width: `${((currentQuestionIndex + 1) / selectedLesson.questions.length) * 100}%` }}>
-                    {((currentQuestionIndex + 1) / selectedLesson.questions.length) * 100 > 15 && (
-                      <Sparkles className="w-3 h-3 text-white" strokeWidth={3} />
-                    )}
-                  </div>
+                  <div
+                    className="bg-blue h-3 rounded-full transition-all"
+                    style={{ width: `${((currentQuestionIndex + 1) / selectedLesson.questions.length) * 100}%` }}
+                  ></div>
                 </div>
               </div>
 
-              {/* Lesson Content - Show only on first question */}
-              {currentQuestionIndex === 0 && (
-                <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-blue mb-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Lightbulb className="w-6 h-6 text-yellow-500" strokeWidth={2.5} />
-                    <h3 className="text-xl font-bold text-gray-800">Lesson Content</h3>
-                  </div>
-                  <div className="text-gray-800 text-lg">
-                    <MarkdownRenderer content={selectedLesson.content} />
-                  </div>
+              {/* Lesson Content */}
+              <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-blue mb-6">
+                <div className="prose max-w-none">
+                  {currentQuestionIndex === 0 && (
+                    <div className="mb-6 whitespace-pre-line text-gray-800 text-lg font-semibold">
+                      {selectedLesson.content}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
 
               {/* Question */}
               <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-teal">
-                <div className="mb-6">
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="bg-teal rounded-full p-2 flex-shrink-0">
-                      <BookOpen className="w-6 h-6 text-white" strokeWidth={2.5} />
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-2xl font-black text-gray-800">
-                        <MarkdownRenderer content={currentQuestion.question} />
-                      </h2>
-                    </div>
-                  </div>
-                </div>
+                <h2 className="text-2xl font-black text-gray-800 mb-6">
+                  {currentQuestion.question}
+                </h2>
 
                 <div className="space-y-4">
                   {currentQuestion.options.map((option, index) => (
                     <button
                       key={index}
                       onClick={() => handleAnswerSelect(index)}
-                      className={`w-full p-5 rounded-2xl font-bold text-left transition-all cursor-pointer border-2 ${
-                        answers[currentQuestionIndex] === index 
-                          ? 'bg-teal text-white border-teal shadow-lg scale-[1.02]' 
-                          : 'bg-gray-50 text-gray-800 border-gray-300 hover:border-teal hover:bg-gray-100'
+                      className={`w-full p-4 rounded-2xl font-bold text-left transition-all cursor-pointer ${
+                        answers[currentQuestionIndex] === index
+                          ? 'bg-teal text-white border-2 border-teal'
+                          : 'bg-gray-100 text-gray-800 border-2 border-gray-300 hover:border-teal'
                       }`}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-black text-lg ${
-                          answers[currentQuestionIndex] === index 
-                            ? 'bg-white text-teal' 
-                            : 'bg-gray-200 text-gray-600'
-                        }`}>
-                          {String.fromCharCode(65 + index)}
-                        </div>
-                        <div className="flex-1 pt-0.5">
-                          <MarkdownRenderer content={option} isDarkBg={answers[currentQuestionIndex] === index} />
-                        </div>
-                        {answers[currentQuestionIndex] === index && (
-                          <CheckCircle className="w-6 h-6 text-white flex-shrink-0" strokeWidth={2.5} />
-                        )}
-                      </div>
+                      <span className="text-lg">{String.fromCharCode(65 + index)}.</span> {option}
                     </button>
                   ))}
                 </div>
@@ -591,23 +574,15 @@ export default function ChildLearnPage() {
                 <button
                   onClick={handleNextQuestion}
                   disabled={answers[currentQuestionIndex] === undefined}
-                  className={`mt-8 w-full py-4 rounded-2xl font-bold text-white text-lg transition-all flex items-center justify-center gap-2 ${
-                    answers[currentQuestionIndex] !== undefined 
-                      ? 'bg-blue hover:bg-blue-600 cursor-pointer shadow-lg hover:shadow-xl' 
-                      : 'bg-gray-400 cursor-not-allowed opacity-50'
+                  className={`mt-6 w-full py-4 rounded-2xl font-bold text-white text-lg transition-all ${
+                    answers[currentQuestionIndex] !== undefined
+                      ? 'bg-blue hover:bg-blue-600 cursor-pointer'
+                      : 'bg-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  {currentQuestionIndex < selectedLesson.questions.length - 1 ? (
-                    <>
-                      <span>Next Question</span>
-                      <ArrowLeft className="w-5 h-5 rotate-180" strokeWidth={2.5} />
-                    </>
-                  ) : (
-                    <>
-                      <span>Submit Quiz</span>
-                      <CheckCircle className="w-5 h-5" strokeWidth={2.5} />
-                    </>
-                  )}
+                  {currentQuestionIndex < selectedLesson.questions.length - 1
+                    ? 'Next Question →'
+                    : 'Submit Quiz ✅'}
                 </button>
               </div>
             </div>
@@ -624,14 +599,10 @@ export default function ChildLearnPage() {
         <div className="min-h-screen bg-gradient-to-b from-peach to-white p-6">
           <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-3xl p-12 shadow-2xl border-2 border-blue text-center">
-              <div className={`w-32 h-32 rounded-full mx-auto mb-6 flex items-center justify-center ${
+              <div className={`w-32 h-32 rounded-full mx-auto mb-6 flex items-center justify-center text-6xl ${
                 quizResult.passed ? 'bg-teal' : 'bg-yellow-400'
               }`}>
-                {quizResult.passed ? (
-                  <PartyPopper className="w-16 h-16 text-white" strokeWidth={2} />
-                ) : (
-                  <Smile className="w-16 h-16 text-white" strokeWidth={2} />
-                )}
+                {quizResult.passed ? '🎉' : '💪'}
               </div>
 
               <h1 className="text-4xl font-black text-gray-800 mb-4">
@@ -639,24 +610,13 @@ export default function ChildLearnPage() {
               </h1>
 
               <div className="bg-blue-100 rounded-2xl p-6 mb-6">
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <Trophy className="w-8 h-8 text-yellow-600" strokeWidth={2.5} />
-                  <p className="text-3xl font-black text-blue">
-                    Score: {quizResult.score}/{quizResult.total}
-                  </p>
-                </div>
-                <p className="text-lg font-semibold text-gray-700 flex items-center justify-center gap-2">
-                  {quizResult.passed ? (
-                    <>
-                      <CheckCircle className="w-5 h-5 text-green-600" strokeWidth={2.5} />
-                      <span>You passed the lesson!</span>
-                    </>
-                  ) : (
-                    <>
-                      <AlertTriangle className="w-5 h-5 text-orange-600" strokeWidth={2.5} />
-                      <span>Try again to improve your score!</span>
-                    </>
-                  )}
+                <p className="text-3xl font-black text-blue mb-2">
+                  Score: {quizResult.score}/{quizResult.total}
+                </p>
+                <p className="text-lg font-semibold text-gray-700">
+                  {quizResult.passed
+                    ? 'You passed the lesson! 🌟'
+                    : 'Try again to improve your score!'}
                 </p>
               </div>
 
@@ -668,10 +628,9 @@ export default function ChildLearnPage() {
                     setQuizResult(null);
                     setAnswers([]);
                   }}
-                  className="w-full bg-blue hover:bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-lg transition cursor-pointer flex items-center justify-center gap-2 shadow-lg"
+                  className="w-full bg-blue hover:bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-lg transition cursor-pointer"
                 >
-                  <BookOpen className="w-6 h-6" strokeWidth={2.5} />
-                  <span>Choose Another Lesson</span>
+                  Choose Another Lesson
                 </button>
                 {!quizResult.passed && (
                   <button
@@ -681,10 +640,9 @@ export default function ChildLearnPage() {
                       setShowResults(false);
                       setQuizResult(null);
                     }}
-                    className="w-full bg-teal hover:bg-teal-600 text-white px-8 py-4 rounded-2xl font-bold text-lg transition cursor-pointer flex items-center justify-center gap-2 shadow-lg"
+                    className="w-full bg-teal hover:bg-teal-600 text-white px-8 py-4 rounded-2xl font-bold text-lg transition cursor-pointer"
                   >
-                    <Shield className="w-6 h-6" strokeWidth={2.5} />
-                    <span>Try Again</span>
+                    Try Again
                   </button>
                 )}
               </div>
@@ -695,3 +653,4 @@ export default function ChildLearnPage() {
     );
   }
 }
+

@@ -86,20 +86,122 @@ export const chatAPI = {
   },
 };
 
+
 // Learning APIs
 export const learningAPI = {
-  getLessons: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/learning/lessons`);
-    return response.json();
-  },
-
-  submitQuiz: async (lessonId, answers) => {
-    const response = await fetch(`${API_BASE_URL}/api/learning/submit`, {
-      method: 'POST',
+  getProgress: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/learning/progress`, {
       headers: getAuthHeaders(),
-      body: JSON.stringify({ lessonId, answers }),
     });
     return response.json();
+  },
+  /**
+   * Get learning progress for a specific child (parent access)
+   * @param {string} childId - The ID of the child
+   * @returns {Promise} Progress data with statistics
+   */
+  getChildProgress: async (childId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/learning/progress/${childId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch child progress');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching child progress:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get current user's learning progress (for children)
+   * @returns {Promise} Progress data with statistics
+   */
+  getMyProgress: async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/learning/progress`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch progress');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching progress:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get all available lessons
+   * @returns {Promise} List of lessons with questions
+   */
+  getLessons: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/learning/lessons`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch lessons');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching lessons:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Submit quiz answers
+   * @param {string} lessonId - The ID of the lesson
+   * @param {number[]} answers - Array of answer indices
+   * @returns {Promise} Quiz result with score
+   */
+  submitQuiz: async (lessonId, answers) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/learning/submit`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lessonId,
+          answers,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit quiz');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error submitting quiz:', error);
+      throw error;
+    }
   },
 };
 
@@ -171,4 +273,3 @@ export const userUtils = {
     return !!getAuthToken();
   },
 };
-

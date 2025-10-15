@@ -2,13 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { userUtils } from '@/app/utils/api';
 
 export default function ChildNavbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userName, setUserName] = useState('Friend');
+
+  useEffect(() => {
+    // Get user data from localStorage
+    const user = userUtils.getUser();
+    if (user && user.name) {
+      setUserName(user.name);
+    }
+  }, []);
 
   const handleLogout = () => {
     // Clear authentication data
@@ -47,7 +56,7 @@ export default function ChildNavbar() {
     },
     {
       href: '/child/rewards',
-      label: 'Rewards',
+      label: 'Progress',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -82,7 +91,7 @@ export default function ChildNavbar() {
               </svg>
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-white font-bold text-2xl">Aware Me</h1>
+              <h1 className="text-white font-black text-2xl">SafeNet</h1>
             </div>
           </Link>
 
@@ -92,7 +101,7 @@ export default function ChildNavbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={'flex items-center space-x-2 px-5 py-3 rounded-2xl font-semibold transition-all text-white hover:bg-white/10'}
+                className={'flex items-center space-x-2 px-5 py-3 rounded-2xl font-bold transition-all text-white hover:bg-white/10'}
               >
                 {link.icon}
                 <span className="text-lg">{link.label}</span>
@@ -100,21 +109,20 @@ export default function ChildNavbar() {
             ))}
           </div>
 
-          {/* Profile + Logout Button (Desktop) */}
-          <div className="hidden md:flex items-center space-x-4">
-            <div className="flex items-center space-x-2 bg-white/20 px-3 py-2 rounded-full">
-              <span className="text-white text-sm font-semibold">Hello, Child</span>
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-teal font-bold">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* User Greeting & Logout */}
+          <div className="hidden md:flex items-center space-x-3">
+            <Link href="/child/profile" className="flex items-center space-x-2 bg-white/20 px-4 py-2 rounded-2xl hover:bg-white/30 transition-all cursor-pointer">
+              <span className="text-white font-bold text-base">Hello, {userName}!</span>
+              <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-lg">
+                <svg className="w-5 h-5 text-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-            </div>
+            </Link>
 
-            {/* Desktop Logout Button */}
             <button
               onClick={handleLogout}
-              className="flex items-center space-x-2 bg-red-500 px-4 py-2 rounded-full cursor-pointer hover:bg-red-600 transition font-medium text-white"
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-2xl font-bold transition-all cursor-pointer flex items-center space-x-2 shadow-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -126,13 +134,13 @@ export default function ChildNavbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden bg-white text-primary-600 p-3 rounded-xl shadow-lg"
+            className="md:hidden text-white p-2 rounded-xl hover:bg-white/10 transition cursor-pointer"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {mobileMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
               )}
             </svg>
           </button>
@@ -140,36 +148,41 @@ export default function ChildNavbar() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden pb-6 space-y-3">
+          <div className="md:hidden py-4 space-y-2 border-t border-white/20">
+            {/* User Greeting Mobile */}
+            <div className="flex items-center space-x-2 px-4 py-3 bg-white/20 rounded-xl mb-3">
+              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                <svg className="w-6 h-6 text-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <span className="text-white font-bold text-lg">Hello, {userName}!</span>
+            </div>
+
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center space-x-3 px-5 py-4 rounded-2xl font-semibold transition-all ${
+                className={`flex items-center space-x-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   isActive(link.href)
-                    ? 'bg-white text-primary-600 shadow-lg'
-                    : 'bg-primary-400 text-white'
+                    ? 'bg-white text-teal'
+                    : 'text-white hover:bg-white/10'
                 }`}
               >
-                <div className="w-8 h-8 flex items-center justify-center">
-                  {link.icon}
-                </div>
-                <span className="text-lg">{link.label}</span>
+                {link.icon}
+                <span>{link.label}</span>
               </Link>
             ))}
 
-            {/* Mobile Logout Button */}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center space-x-3 px-5 py-4 rounded-2xl font-semibold bg-red-500 text-white hover:bg-red-600 transition cursor-pointer"
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition cursor-pointer"
             >
-              <div className="w-8 h-8 flex items-center justify-center">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </div>
-              <span className="text-lg">Logout</span>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span>Logout</span>
             </button>
           </div>
         )}
