@@ -1,32 +1,37 @@
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
-pydantic[email]==2.5.3
-python-jose[cryptography]==3.3.0
-PyJWT==2.8.0
-passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
-bcrypt==4.1.2
+# Web Framework
+fastapi
+uvicorn
+
+# Data Validation
+pydantic
+pydantic-settings
+
+# Authentication & Security
+python-jose
+PyJWT
+passlib
+bcrypt==4.0.1
+python-multipart
 
 # LangChain Core
-langchain==0.1.20
-langchain-core==0.1.52
-langchain-community==0.0.38
+langchain
+langchain-core
+langchain-community
 
 # LangChain Model Providers
-langchain-google-genai==1.0.1
-langchain-huggingface==0.0.1
-google-generativeai==0.4.0
-huggingface-hub==0.20.2
+langchain-google-genai
+langchain-huggingface
+google-generativeai
+huggingface-hub
 
 # Vector Store & Embeddings
-chromadb==0.4.22
-sentence-transformers==2.3.1
+chromadb
+sentence-transformers
 
 # Web Scraping for RAG
-beautifulsoup4==4.12.3
-lxml==5.1.0
+beautifulsoup4
+lxml
 
 # Utilities
-python-dotenv==1.0.0
-requests==2.31.0
+python-dotenv
+requests
