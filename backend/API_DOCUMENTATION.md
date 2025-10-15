@@ -1,33 +1,39 @@
-# AwareMe Backend API Documentation
+# SafeNet API Documentation
 
-## 📚 Overview
+Version: 1.0.0
 
-AwareMe is a child safety education platform with AI-powered chatbots for both children and parents. The backend provides RESTful APIs for authentication, chat interactions, learning modules, emergency alerts, and safety resources.
-
-**Base URL:** `http://localhost:8000`  
-**API Documentation:** `http://localhost:8000/docs` (Swagger UI)  
-**Alternative Docs:** `http://localhost:8000/redoc`
+Base URL: `http://localhost:8000`
 
 ---
 
-## 🔐 Authentication
+## Table of Contents
 
-All protected endpoints require a JWT token in the Authorization header:
-```
-Authorization: Bearer <your-jwt-token>
-```
+1. [Authentication](#authentication)
+2. [Profile Management](#profile-management)
+3. [Chat Services](#chat-services)
+4. [Learning & Progress](#learning--progress)
+5. [Emergency Services](#emergency-services)
+6. [Resources](#resources)
+7. [Health Check](#health-check)
 
-### POST `/api/auth/signup`
+---
+
+## Authentication
+
+### Sign Up
+
+**POST** `/api/auth/signup`
+
 Register a new user (parent or child).
 
 **Request Body:**
 ```json
 {
-  "email": "user@example.com",
-  "password": "secure123",
-  "role": "parent",  // or "child"
-  "name": "John Doe",
-  "age": 10  // Required only for children
+  "email": "string",
+  "password": "string",
+  "role": "parent | child",
+  "name": "string",
+  "age": "number (optional, required for children)"
 }
 ```
 
@@ -35,34 +41,35 @@ Register a new user (parent or child).
 ```json
 {
   "success": true,
-  "token": "eyJhbGc...",
+  "token": "string",
   "user": {
-    "id": "uuid-here",
-    "email": "user@example.com",
-    "role": "parent",
-    "name": "John Doe",
-    "age": null
+    "id": "string",
+    "email": "string",
+    "role": "string",
+    "name": "string",
+    "age": "number | null"
   },
   "message": "Account created successfully"
 }
 ```
 
-**Notes:**
-- Creates a new session automatically
-- Password must be at least 6 characters
-- Role must be either "parent" or "child"
-- Age is required for child accounts
+**Status Codes:**
+- `200` - Success
+- `400` - Validation error (e.g., missing age for child, email already registered)
 
 ---
 
-### POST `/api/auth/login`
+### Login
+
+**POST** `/api/auth/login`
+
 Login existing user.
 
 **Request Body:**
 ```json
 {
-  "email": "user@example.com",
-  "password": "secure123"
+  "email": "string",
+  "password": "string"
 }
 ```
 
@@ -70,68 +77,65 @@ Login existing user.
 ```json
 {
   "success": true,
-  "token": "eyJhbGc...",
+  "token": "string",
   "user": {
-    "id": "uuid-here",
-    "email": "user@example.com",
-    "role": "parent",
-    "name": "John Doe",
-    "age": null
+    "id": "string",
+    "email": "string",
+    "role": "string",
+    "name": "string",
+    "age": "number | null"
   },
   "message": "Login successful"
 }
 ```
 
-**Notes:**
-- Creates a new session on each login
-- Previous session chat history is isolated
-- Token expires in 7 days
+**Status Codes:**
+- `200` - Success
+- `401` - Invalid credentials
 
 ---
 
-### POST `/api/auth/logout`
-Logout and clear current session.
+## Profile Management
 
-**Headers:** `Authorization: Bearer <token>`
+### Get Current User Profile
+
+**GET** `/api/profile`
+
+Get current authenticated user's profile.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
 
 **Response:**
 ```json
 {
-  "success": true,
-  "message": "Logged out successfully"
+  "id": "string",
+  "email": "string",
+  "role": "parent | child",
+  "name": "string",
+  "age": "number | null"
 }
 ```
 
-**Notes:**
-- Deletes current session from database
-- Chat history remains for analytics but won't be shared with new sessions
+**Status Codes:**
+- `200` - Success
+- `401` - Unauthorized
+- `404` - User not found
 
 ---
 
-## 👤 Profile Management
+### Get Children Profiles
 
-### GET `/api/profile`
-Get current user profile.
+**GET** `/api/profile/children`
 
-**Headers:** `Authorization: Bearer <token>`
+Get all linked children profiles for parent.
 
-**Response:**
-```json
-{
-  "id": "uuid-here",
-  "email": "user@example.com",
-  "role": "parent",
-  "name": "John Doe",
-  "age": null
-}
+**Headers:**
 ```
-
----
-
-### GET `/api/profile/children`
-Get all linked children profiles (parents only).
-
-**Headers:** `Authorization: Bearer <token>`
+Authorization: Bearer {token}
+```
 
 **Response:**
 ```json
@@ -140,36 +144,38 @@ Get all linked children profiles (parents only).
   "count": 2,
   "children": [
     {
-      "id": "child-uuid-1",
-      "email": "child1@example.com",
+      "id": "string",
+      "email": "string",
       "role": "child",
-      "name": "Emma Doe",
+      "name": "string",
       "age": 10
-    },
-    {
-      "id": "child-uuid-2",
-      "email": "child2@example.com",
-      "role": "child",
-      "name": "Liam Doe",
-      "age": 8
     }
   ]
 }
 ```
 
-**Error (403):** If user is not a parent
+**Status Codes:**
+- `200` - Success
+- `401` - Unauthorized
+- `403` - Forbidden (user is not a parent)
 
 ---
 
-### POST `/api/profile/link-child`
-Link a child account to parent account.
+### Link Child to Parent
 
-**Headers:** `Authorization: Bearer <token>`
+**POST** `/api/profile/link-child`
+
+Link a child account to a parent account.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
 
 **Request Body:**
 ```json
 {
-  "childEmail": "child@example.com"
+  "childEmail": "string"
 }
 ```
 
@@ -177,28 +183,35 @@ Link a child account to parent account.
 ```json
 {
   "success": true,
-  "message": "Successfully linked to Emma Doe"
+  "message": "Successfully linked to {child_name}"
 }
 ```
 
-**Notes:**
-- Only parents can link children
-- Child account must already exist
-- Parent will receive emergency alerts from linked children
+**Status Codes:**
+- `200` - Success
+- `401` - Unauthorized
+- `403` - Forbidden (user is not a parent)
+- `404` - Child account not found
 
 ---
 
-## 💬 Chat Endpoints (AI-Powered)
+## Chat Services
 
-### POST `/api/chat/child`
-Child-friendly chatbot with safety education.
+### Child Chatbot
 
-**Headers:** `Authorization: Bearer <token>`
+**POST** `/api/chat/child`
+
+AI-powered chatbot for children with distress detection.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
 
 **Request Body:**
 ```json
 {
-  "message": "What is good touch and bad touch?"
+  "message": "string"
 }
 ```
 
@@ -206,32 +219,40 @@ Child-friendly chatbot with safety education.
 ```json
 {
   "success": true,
-  "response": "Great question! 🌟 Good touch is when someone you trust, like your mom or dad, gives you a hug or high-five...",
+  "response": "string",
   "distressDetected": false,
-  "timestamp": "2025-10-13T10:30:00.000Z"
+  "timestamp": "2025-10-16T12:00:00.000Z"
 }
 ```
 
 **Features:**
-- Uses child's age for age-appropriate responses
-- Remembers conversation within current session
-- Detects distress keywords (hurt, scared, uncomfortable, etc.)
-- Auto-alerts linked parent if distress detected
-- Child-friendly language with emojis
+- Context-aware responses for children
+- Automatic distress detection
+- Creates emergency alerts for parents when distress is detected
+- Saves chat history
 
-**Distress Keywords:** hurt, uncomfortable, scared, touched, secret, help, afraid
+**Status Codes:**
+- `200` - Success
+- `401` - Unauthorized
+- `403` - Forbidden (user is not a child)
 
 ---
 
-### POST `/api/chat/parent`
-Parent guidance chatbot with expert advice.
+### Parent Chatbot
 
-**Headers:** `Authorization: Bearer <token>`
+**POST** `/api/chat/parent`
+
+AI-powered guidance chatbot for parents.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
 
 **Request Body:**
 ```json
 {
-  "message": "How do I talk to my 8-year-old about body safety?"
+  "message": "string"
 }
 ```
 
@@ -239,25 +260,31 @@ Parent guidance chatbot with expert advice.
 ```json
 {
   "success": true,
-  "response": "Here's a practical approach for talking to your 8-year-old about body safety...",
+  "response": "string",
   "distressDetected": false,
-  "timestamp": "2025-10-13T10:30:00.000Z"
+  "timestamp": "2025-10-16T12:00:00.000Z"
 }
 ```
 
 **Features:**
-- Expert guidance on child safety topics
-- Remembers conversation within current session
-- Uses RAG (Retrieval Augmented Generation) with authoritative sources
-- Provides actionable steps and practical advice
-- Non-judgmental and supportive tone
+- Parenting guidance and advice
+- Safety education tips
+- Saves chat history
+
+**Status Codes:**
+- `200` - Success
+- `401` - Unauthorized
+- `403` - Forbidden (user is not a parent)
 
 ---
 
-## 📚 Learning Modules
+## Learning & Progress
 
-### GET `/api/learning/lessons`
-Get all interactive safety lessons for children.
+### Get All Lessons
+
+**GET** `/api/learning/lessons`
+
+Get all interactive safety lessons with questions.
 
 **Response:**
 ```json
@@ -265,17 +292,17 @@ Get all interactive safety lessons for children.
   "success": true,
   "lessons": [
     {
-      "id": "lesson-1",
-      "title": "Good Touch, Bad Touch 🤗",
-      "description": "Learn about safe and unsafe touches",
-      "content": "**What is Good Touch?**\n- Hugs from people you trust...",
+      "id": "string",
+      "title": "string",
+      "description": "string",
+      "content": "string",
       "questions": [
         {
-          "id": "q1",
-          "question": "Which is a good touch?",
-          "options": ["A hug from mom", "Someone touching private parts", "Being forced to kiss someone"],
+          "id": "string",
+          "question": "string",
+          "options": ["string"],
           "correctAnswer": 0,
-          "explanation": "Hugs from trusted family members are good touches! 🤗"
+          "explanation": "string"
         }
       ]
     }
@@ -283,23 +310,27 @@ Get all interactive safety lessons for children.
 }
 ```
 
-**Available Lessons:**
-1. **Good Touch, Bad Touch** - Understanding safe and unsafe touches
-2. **My Body, My Rules** - Body autonomy and consent
-3. **Trusted Adults** - Who to talk to when you need help
+**Status Codes:**
+- `200` - Success
 
 ---
 
-### POST `/api/learning/submit`
+### Submit Quiz
+
+**POST** `/api/learning/submit`
+
 Submit quiz answers and get results.
 
-**Headers:** `Authorization: Bearer <token>`
+**Headers:**
+```
+Authorization: Bearer {token}
+```
 
 **Request Body:**
 ```json
 {
-  "lessonId": "lesson-1",
-  "answers": [0, 1]  // Array of selected answer indices
+  "lessonId": "string",
+  "answers": [0, 1, 2, 3]
 }
 ```
 
@@ -307,26 +338,138 @@ Submit quiz answers and get results.
 ```json
 {
   "success": true,
-  "score": 2,
-  "total": 2,
-  "passed": true  // 70% or higher to pass
+  "score": 8,
+  "total": 10,
+  "passed": true
 }
 ```
 
+**Notes:**
+- Passing score is 70% (7/10)
+- Progress is automatically tracked in database
+
+**Status Codes:**
+- `200` - Success
+- `401` - Unauthorized
+- `403` - Forbidden (user is not a child)
+- `404` - Lesson not found
+
 ---
 
-## 🚨 Emergency Alerts
+### Get User Progress
 
-### POST `/api/emergency/alert`
+**GET** `/api/learning/progress`
+
+Get learning progress for current user (child only).
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "progress": [
+    {
+      "lesson_id": "string",
+      "lesson_title": "string",
+      "lesson_description": "string",
+      "score": 8,
+      "total_questions": 10,
+      "passed": true,
+      "completed_at": "2025-10-16T12:00:00.000Z"
+    }
+  ],
+  "statistics": {
+    "total_lessons": 10,
+    "completed_lessons": 5,
+    "completion_percentage": 50.0,
+    "total_correct_answers": 40,
+    "total_questions_attempted": 50,
+    "accuracy_percentage": 80.0
+  }
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Unauthorized
+- `403` - Forbidden (user is not a child)
+
+---
+
+### Get Child Progress (Parent View)
+
+**GET** `/api/learning/progress/{child_id}`
+
+Get learning progress for a specific child (parent access only).
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
+
+**Path Parameters:**
+- `child_id` - The ID of the child
+
+**Response:**
+```json
+{
+  "success": true,
+  "child": {
+    "id": "string",
+    "name": "string",
+    "age": 10
+  },
+  "progress": [
+    {
+      "lesson_id": "string",
+      "lesson_title": "string",
+      "lesson_description": "string",
+      "score": 8,
+      "total_questions": 10,
+      "passed": true,
+      "completed_at": "2025-10-16T12:00:00.000Z"
+    }
+  ],
+  "statistics": {
+    "total_lessons": 10,
+    "completed_lessons": 5,
+    "completion_percentage": 50.0,
+    "total_correct_answers": 40,
+    "total_questions_attempted": 50,
+    "accuracy_percentage": 80.0
+  }
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Unauthorized
+- `403` - Forbidden (user is not a parent or child not linked)
+
+---
+
+## Emergency Services
+
+### Send Emergency Alert
+
+**POST** `/api/emergency/alert`
+
 Send emergency alert to parent/trusted contacts.
 
-**Headers:** `Authorization: Bearer <token>`
+**Headers:**
+```
+Authorization: Bearer {token}
+```
 
 **Request Body:**
 ```json
 {
-  "message": "I need help!",
-  "location": "At home"  // Optional
+  "message": "string",
+  "location": "string (optional)"
 }
 ```
 
@@ -335,22 +478,27 @@ Send emergency alert to parent/trusted contacts.
 {
   "success": true,
   "message": "Emergency alert sent successfully",
-  "alertId": "alert-uuid",
+  "alertId": "string",
   "notifiedContacts": ["parent@example.com"]
 }
 ```
 
-**Notes:**
-- Automatically notifies linked parent(s)
-- Location is optional but recommended
-- Alert is stored in database for parent review
+**Status Codes:**
+- `200` - Success
+- `401` - Unauthorized
 
 ---
 
-### GET `/api/emergency/alerts`
-Get all emergency alerts from linked children (parents only).
+### Get Emergency Alerts
 
-**Headers:** `Authorization: Bearer <token>`
+**GET** `/api/emergency/alerts`
+
+Get emergency alerts for parents.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
 
 **Response:**
 ```json
@@ -358,24 +506,31 @@ Get all emergency alerts from linked children (parents only).
   "success": true,
   "alerts": [
     {
-      "id": "alert-uuid",
-      "user_id": "child-uuid",
-      "message": "Distress detected in chat: I feel uncomfortable...",
-      "location": "Chat conversation",
-      "created_at": "2025-10-13T10:30:00.000Z"
+      "id": "string",
+      "user_id": "string",
+      "message": "string",
+      "location": "string",
+      "created_at": "2025-10-16T12:00:00.000Z",
+      "resolved": false
     }
   ]
 }
 ```
 
-**Error (403):** If user is not a parent
+**Status Codes:**
+- `200` - Success
+- `401` - Unauthorized
+- `403` - Forbidden (user is not a parent)
 
 ---
 
-## 📖 Resources
+## Resources
 
-### GET `/api/resources`
-Get curated child safety resources.
+### Get Resources
+
+**GET** `/api/resources`
+
+Get curated resources and hotlines for parents.
 
 **Response:**
 ```json
@@ -383,280 +538,168 @@ Get curated child safety resources.
   "success": true,
   "resources": [
     {
-      "id": "r1",
-      "title": "National Child Abuse Hotline",
-      "description": "24/7 support for child abuse prevention and reporting",
-      "url": "1-800-422-4453",
-      "category": "Hotline"
-    },
-    {
-      "id": "r6",
-      "title": "UNICEF - Child Protection",
-      "description": "Violence, Exploitation & Abuse prevention resources",
-      "url": "https://www.unicef.org/child-protection",
-      "category": "Organization"
+      "id": "string",
+      "title": "string",
+      "description": "string",
+      "url": "string",
+      "category": "Hotline | Article | Organization | Educational | Counseling"
     }
   ]
 }
 ```
 
-**Resource Categories:**
-- **Hotline** - Emergency phone numbers
-- **Organization** - Child safety organizations
-- **Educational** - Articles and fact sheets
-- **Article** - Specific guides
-- **Counseling** - Professional counseling services
+**Available Resources:**
+- National Child Abuse Hotline
+- Talking to Kids About Body Safety
+- Darkness to Light
+- RAINN
+- Child Mind Institute
+- UNICEF - Child Protection
+- WHO - Child Maltreatment
+- ISPCAN
+- Childhelp National Child Abuse Hotline
+- Child Welfare Information Gateway
+- National Center for Missing & Exploited Children
+- Professional Counseling Request
 
-**Included Resources:**
-1. National Child Abuse Hotline
-2. Talking to Kids About Body Safety
-3. Darkness to Light
-4. RAINN
-5. Child Mind Institute
-6. UNICEF - Child Protection
-7. WHO - Child Maltreatment
-8. ISPCAN
-9. Childhelp National Child Abuse Hotline
-10. Child Welfare Information Gateway
-11. National Center for Missing & Exploited Children (NCMEC)
-12. Request Counseling Session (Mock)
+**Status Codes:**
+- `200` - Success
 
 ---
 
-### POST `/api/counseling/request`
-Request professional counseling session (Mock endpoint).
+### Request Counseling
 
-**Headers:** `Authorization: Bearer <token>`
+**POST** `/api/counseling/request`
+
+Request professional counseling session (mock endpoint).
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
 
 **Response:**
 ```json
 {
   "success": true,
   "message": "Counseling request submitted. A counselor will contact you within 24 hours.",
-  "requestId": "request-uuid"
+  "requestId": "string"
 }
 ```
 
+**Status Codes:**
+- `200` - Success
+- `401` - Unauthorized
+
 ---
 
-## 🏥 Health Check
+## Health Check
 
-### GET `/`
-Check API health status.
+### Root Endpoint
+
+**GET** `/`
+
+Check API status and get basic information.
 
 **Response:**
 ```json
 {
-  "message": "AwareMe API is running",
+  "message": "SafeNet API is running",
   "version": "1.0.0",
   "docs": "/docs"
 }
 ```
 
----
-
-## 🔑 Key Features
-
-### Session-Based Chat History
-- **Context Preservation**: AI remembers conversations within the same login session
-- **Session Isolation**: Each login creates a new session with fresh context
-- **History Limit**: Last 10 messages used to prevent token overflow
-- **Privacy**: Previous sessions are not shared with new logins
-
-### Distress Detection
-- Monitors child chat for distress keywords
-- Automatically creates emergency alert for linked parents
-- Suggests contacting trusted adults
-- Stores context in alert for parent review
-
-### Role-Based Access Control
-- **Parent-only endpoints**: `/api/profile/children`, `/api/emergency/alerts`
-- **Child-only endpoints**: Child chatbot (enforced at endpoint level)
-- **Parent-only features**: Linking children, viewing alerts, counseling requests
+**Status Codes:**
+- `200` - Success
 
 ---
 
-## 📊 Database Schema
+## Authentication
 
-### Tables:
-1. **users** - User accounts (parents and children)
-2. **user_sessions** - Active login sessions
-3. **parent_child_links** - Parent-child relationships
-4. **emergency_alerts** - Emergency alerts from children
-5. **chat_history** - Chat conversation history
+All protected endpoints require a JWT token in the Authorization header:
+
+```
+Authorization: Bearer {your_jwt_token}
+```
+
+Get a token by calling the `/api/auth/signup` or `/api/auth/login` endpoints.
 
 ---
 
-## 🛠️ Error Handling
+## Error Responses
 
-### Standard Error Response:
+All endpoints may return the following error responses:
+
+### 400 Bad Request
 ```json
 {
-  "detail": "Error message here"
+  "detail": "Error message describing the validation issue"
 }
 ```
 
-### Common HTTP Status Codes:
-- **200 OK** - Success
-- **401 Unauthorized** - Invalid or missing JWT token
-- **403 Forbidden** - Insufficient permissions (wrong role)
-- **404 Not Found** - Resource not found
-- **422 Unprocessable Entity** - Validation error
-
----
-
-## 🧪 Example Usage Flow
-
-### 1. Parent Registration & Setup
-```bash
-# 1. Register parent
-POST /api/auth/signup
+### 401 Unauthorized
+```json
 {
-  "email": "parent@example.com",
-  "password": "secure123",
-  "role": "parent",
-  "name": "Jane Doe"
-}
-
-# 2. Get profile
-GET /api/profile
-Authorization: Bearer <token>
-
-# 3. Link child
-POST /api/profile/link-child
-{
-  "childEmail": "child@example.com"
-}
-
-# 4. Chat with parent bot
-POST /api/chat/parent
-{
-  "message": "How do I teach my child about consent?"
+  "detail": "Could not validate credentials"
 }
 ```
 
-### 2. Child Interaction
-```bash
-# 1. Register/Login child
-POST /api/auth/login
+### 403 Forbidden
+```json
 {
-  "email": "child@example.com",
-  "password": "childsecure"
-}
-
-# 2. Chat with child bot
-POST /api/chat/child
-{
-  "message": "What should I do if someone makes me uncomfortable?"
-}
-
-# 3. Get lessons
-GET /api/learning/lessons
-
-# 4. Submit quiz
-POST /api/learning/submit
-{
-  "lessonId": "lesson-1",
-  "answers": [0, 1]
-}
-
-# 5. Emergency alert
-POST /api/emergency/alert
-{
-  "message": "I need help!",
-  "location": "At school"
+  "detail": "Permission denied message"
 }
 ```
 
-### 3. Parent Monitoring
-```bash
-# 1. View linked children
-GET /api/profile/children
+### 404 Not Found
+```json
+{
+  "detail": "Resource not found"
+}
+```
 
-# 2. Check emergency alerts
-GET /api/emergency/alerts
-
-# 3. Get safety resources
-GET /api/resources
+### 500 Internal Server Error
+```json
+{
+  "detail": "Internal server error message"
+}
 ```
 
 ---
 
-## 🚀 Tech Stack
+## Interactive API Documentation
 
-- **Framework**: FastAPI 0.109.0
-- **Authentication**: JWT (PyJWT, python-jose)
-- **Password Hashing**: bcrypt via passlib
-- **Database**: SQLite (contextmanager pattern)
-- **AI Models**: 
-  - Google Gemini (gemini-pro) - Primary
-  - HuggingFace (Mistral-7B) - Alternative
-- **LangChain**: Conversation management and RAG
-- **Vector Store**: ChromaDB with HuggingFace embeddings
-- **Embeddings**: sentence-transformers/all-MiniLM-L6-v2
-- **Web Scraping**: BeautifulSoup4 for RAG data collection
+FastAPI provides interactive API documentation:
+
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
 
 ---
 
-## 🔧 Configuration
+## CORS Configuration
 
-### Environment Variables:
-```bash
-# AI Model Provider
-MODEL_PROVIDER=gemini  # or "huggingface"
+The API allows cross-origin requests from:
+- `http://localhost:3000` (Next.js default)
+- `http://localhost:5173` (Vite default)
 
-# API Keys
-GEMINI_API_KEY=your-gemini-api-key
-HUGGINGFACE_API_KEY=your-hf-api-key
-```
-
-### Default Settings:
-- **JWT Expiration**: 7 days
-- **Secret Key**: `awareme-mvp-secret-key-2024` (MVP only - change in production)
-- **Database**: `app.db` (SQLite)
-- **Vector Store**: `./vectorstore` (ChromaDB)
-- **CORS Origins**: `http://localhost:3000`, `http://localhost:5173`
+All methods and headers are allowed for these origins.
 
 ---
 
-## 📝 Notes
+## Rate Limiting
 
-### For Production:
-1. ⚠️ Change SECRET_KEY in `auth.py`
-2. Use environment variables for all secrets
-3. Enable HTTPS
-4. Add rate limiting
-5. Use PostgreSQL instead of SQLite
-6. Implement proper logging and monitoring
-7. Add input sanitization and validation
-8. Set up proper CORS origins
-9. Implement refresh tokens
-10. Add API versioning
-
-### RAG Data Sources:
-The parent chatbot uses RAG with content from:
-- UTMB - Good Touch and Bad Touch
-- NCBI - Child Safety Research
-- UNICEF - Child Protection
-- WHO - Child Maltreatment
-- ISPCAN
-- Childhelp
-- Child Welfare Gateway
-- Missing Kids (NCMEC)
+Currently, no rate limiting is implemented. Consider adding rate limiting in production.
 
 ---
 
-## 📞 Support
+## Notes
 
-For API issues or questions:
-- Check `/docs` for interactive testing
-- Review error messages in responses
-- Ensure JWT token is valid and not expired
-- Verify user role matches endpoint requirements
-
----
-
-**Last Updated:** October 13, 2025  
-**API Version:** 1.0.0  
-**Documentation Version:** 1.0
+- All timestamps are in ISO 8601 format (UTC)
+- The API uses SQLite for data persistence
+- AI features use Google Gemini or HuggingFace models
+- Emergency alerts automatically notify linked parents
+- Chat distress detection triggers automatic emergency alerts
+- Quiz passing score is 70%
+- Parent-child linking is one-way (parents can view child data)
 
